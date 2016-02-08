@@ -16,9 +16,9 @@ GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 # Displays the program usage
 def usage():
-    print "beattobeat.py: beat counter and translator"
+    print "beatbybeat.py: beat counter and translator"
     print "               Run as root.\n"
-    print "Usage:  beattobeat.py [OPTION]...\n"
+    print "Usage:  beatbybeat.py [OPTION]...\n"
     print "Options:"
     print "    -h, --help"
     print "           Display this help and exit"
@@ -28,9 +28,9 @@ def usage():
     print "           Period of time between BPM calculations (milliseconds), default: 5000"
     print "    -v, --verbose"
     print "           enables log output to the console\n"
-    print "Examples: mycodo.py"
-    print "          mycodo.py -m 1000 -p 3000"
-    print "          mycodo.py -v\n"
+    print "Examples: beatbybeat.py"
+    print "          beatbybeat.py -m 1000 -p 3000"
+    print "          beatbybeat.py -v\n"
 
 def menu():
     max_bpm = 700
