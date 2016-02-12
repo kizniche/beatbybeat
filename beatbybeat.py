@@ -10,13 +10,7 @@ import argparse
 import RPi.GPIO as GPIO
 import sys
 
-
 def menu():
-    # max_bpm = 1200
-    # bpm_period_milliseconds = 5000
-    # verbose = False
-    # gpio_pin = 23
-
     parser = argparse.ArgumentParser(description='Beat counter (bpm) and Morse code translator')
 
     beat_counter = parser.add_argument_group('Beat counter controls')
@@ -24,8 +18,8 @@ def menu():
                               help="Start program to count beats (bpm)")
 
     beat_counter.add_argument('-m','--maxbpm', metavar='MAXBPM', type=int,
-                              help='Set maximum detectable BPM (lower number improves accuracy, below 2000 should be accurate), default: 1200',
-                              default=2000,
+                              help='Set maximum detectable BPM (lower number improves accuracy, below 1000 should be accurate), default: 1000',
+                              default=500,
                               required=False)
 
     beat_counter.add_argument('-p','--period', metavar='PERIOD', type=int,
@@ -59,12 +53,11 @@ def menu():
     elif args.count and args.translate:
         parser.error('Cannot select both --count and --translate, only select one')
     elif args.count:
-        print 'Starting mode: Beats per minute (BPM) counter'
+        print 'Starting mode: Beats per minute (BPM) counter',
     elif args.translate:
-        print 'Starting mode: Morse code translator'
+        print 'Starting mode: Morse code translator',
 
-    if args.verbose:
-        print 'Verbose enabled'
+        print '(Verbose {})'.format(args.verbose)
 
     ########################################
     #                                      #
@@ -89,10 +82,8 @@ def menu():
     ########################################
 
     if args.count:
-        max_bpm = args.maxbpm
-        period = args.period
-        print 'BPM calculation period: {} milliseconds, Max BPM: {} BPM'.format(period, max_bpm)
-        beatcount.beat_counter(args.gpio, args.verbose, period, max_bpm)
+        print 'BPM calculation period: {} milliseconds, Max BPM: {} BPM'.format(args.period, args.maxbpm)
+        beatcount.beat_counter(args.verbose, args.gpio, args.period, args.maxbpm)
 
     ########################################
     #                                      #
@@ -101,7 +92,8 @@ def menu():
     ########################################
 
     if args.translate:
-        translate.morse_translator()
+        print 'BPM calculation period: {} milliseconds, Max BPM: {} BPM'.format(args.period, args.maxbpm)
+        translate.morse_translator(args.verbose, args.gpio, args.period, args.maxbpm)
 
 
 if __name__ == "__main__":
