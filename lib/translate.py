@@ -41,13 +41,13 @@ def detect_bpm(verbose, gpio, period, max_bpm):
 
     start_time = time_between_beatcount = int(round(time.time()*1000))
     print 'Beat number {}, time now: {}'.format(beat_count_period, start_time)
-    beat_count_period += 1
 
     while not detected_milliseconds:
         # Duration between beats must be greater than or equal to the duration of max BPM in milliseconds
         if int(round(time.time()*1000)) - time_between_beatcount >= 60000 / max_bpm:
             if GPIO.input(gpio) == False:
                 time_now = int(round(time.time()*1000))
+                beat_count_period += 1
 
                 if first_beat:
                     duration_total = int(round(time.time()*1000)) - time_between_beatcount
@@ -58,12 +58,11 @@ def detect_bpm(verbose, gpio, period, max_bpm):
                     print 'Beat number {}, Time: {}, Diff: {} ms, Average: {} ms'.format(beat_count_period, time_now, time_now - time_between_beatcount, duration_total / (beat_count_period - 1))
 
                 time_between_beatcount = time_now
-                beat_count_period += 1
                 while GPIO.input(gpio) == False:
                     time.sleep(sleep_time)
 
         if int(round(time.time()*1000)) - start_time > period:
-            detected_milliseconds = duration_total / (beat_count_period - 2)
+            detected_milliseconds = duration_total / (beat_count_period - 1)
         time.sleep(sleep_time)
 
     return detected_milliseconds
