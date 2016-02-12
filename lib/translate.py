@@ -12,21 +12,23 @@ def morse_translator(verbose, gpio, period, max_bpm):
           '\nTap a tempo to identify the duration between letters (spaces).', \
           '\nTiming will begin upon the first buttom press and be measured for {} milliseconds.\n'.format(period)
     
-    miliseconds_space = detect_bpm(verbose, gpio, period, max_bpm)
-    print '\nDetected rates (ms = milliseconds, BPM = beats per minute):\nSpace: {} ms ({} BPM)\nDash: {} ms ({} BPM)\nDot: {} ms ({} BPM)\n'.format(
-            miliseconds_space, 60000 / miliseconds_space,
-            miliseconds_space * 2 / 3, 60000 / (miliseconds_space * 2 / 3),
-            miliseconds_space / 3, 60000 / (miliseconds_space / 3))
-    print 'Stop tapping and wait 5 seconds before beginning Morse code...\n'
+    milliseconds_space = detect_bpm(verbose, gpio, period, max_bpm)
+    milliseconds_dash = milliseconds_space * 2 / 3
+    milliseconds_dot = milliseconds_space / 3
+    print '\nDetected rates (ms = milliseconds, BPM = beats per minute):'
+    print 'Space: {} ms ({} BPM)'.format(milliseconds_space, 60000 / milliseconds_space)
+    print 'Dash: {} ms ({} BPM)'.format(milliseconds_dash, 60000 / milliseconds_dash)
+    print 'Dot: {} ms ({} BPM)'.format(milliseconds_dot, 60000 / milliseconds_dot)
+    print '\nStop tapping and wait 5 seconds before beginning Morse code...\n'
     time.sleep(5)
     
     print 'Begin Morse code and translation will take place automatically.', \
-          'A new letter will begin to be interpreted if the duration between taps is equal to or longer then {} ms ({} BPM).\n'.format(miliseconds_space, 60000 / miliseconds_space)
+          '\nA new letter will begin to be interpreted if the duration between taps is equal to or longer then {} ms ({} BPM).\n'.format(milliseconds_space, 60000 / milliseconds_space)
 
 
 def detect_bpm(verbose, gpio, period, max_bpm):
     sleep_time = 1 / max_bpm # Calculate minimum sleep duration possible to detect the maximum BPM
-    beat_count_period = 0
+    beat_count_period = 1
     duration_average = 0
     first_beat = True
 
