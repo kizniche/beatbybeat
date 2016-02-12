@@ -18,7 +18,7 @@ def menu():
                               help="Start program to count beats (bpm)")
 
     beat_counter.add_argument('-m','--maxbpm', metavar='MAXBPM', type=int,
-                              help='Set maximum detectable BPM (lower number improves accuracy, below 1000 should be accurate), default: 1000',
+                              help='Set maximum detectable BPM (lower number improves accuracy, higher numbers may register erroneous taps, below 1000 should be accurate), default: 500',
                               default=500,
                               required=False)
 
@@ -57,7 +57,7 @@ def menu():
     elif args.translate:
         print 'Starting mode: Morse code translator',
 
-        print '(Verbose {})'.format(args.verbose)
+    print '(Verbose {})'.format(args.verbose)
 
     ########################################
     #                                      #
@@ -77,7 +77,7 @@ def menu():
 
     ########################################
     #                                      #
-    #        Beat Counter Options          #
+    #             Beat Counter             #
     #                                      #
     ########################################
 
@@ -87,7 +87,7 @@ def menu():
 
     ########################################
     #                                      #
-    #    Morse Code Translator Options     #
+    #         Morse Code Translator        #
     #                                      #
     ########################################
 
