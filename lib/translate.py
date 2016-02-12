@@ -12,24 +12,24 @@ def morse_translator(verbose, gpio, period, max_bpm):
           '\nTap a tempo to identify the duration between letters (spaces).', \
           '\nTiming will begin upon the first buttom press and be measured for {} milliseconds.\n'.format(period)
     
-    milliseconds_space = detect_bpm(verbose, gpio, period, max_bpm)
-    milliseconds_dash = milliseconds_space * 2 / 3
-    milliseconds_dot = milliseconds_space / 3
-    print '\nDetected rates (ms = milliseconds, BPM = beats per minute):'
-    print 'Space: {} ms ({} BPM)'.format(milliseconds_space, 60000 / milliseconds_space)
-    print 'Dash: {} ms ({} BPM)'.format(milliseconds_dash, 60000 / milliseconds_dash)
+    milliseconds_space_dash = detect_bpm(verbose, gpio, period, max_bpm)
+    milliseconds_dot = milliseconds_space_dash / 3
+    print '\nTempo acquired (ms = milliseconds, BPM = beats per minute):'
+    print 'Space: {} ms ({} BPM)'.format(milliseconds_space_dash, 60000 / milliseconds_space_dash)
+    print 'Dash: {} ms ({} BPM)'.format(milliseconds_space_dash, 60000 / milliseconds_space_dash)
     print 'Dot: {} ms ({} BPM)'.format(milliseconds_dot, 60000 / milliseconds_dot)
-    print '\nStop tapping and wait 5 seconds before beginning Morse code...\n'
+    print '\nWait 5 seconds before beginning Morse code...\n'
     time.sleep(5)
     
-    print 'Begin Morse code and translation will take place automatically.', \
-          '\nA new letter will begin to be interpreted if the duration between taps is equal to or longer then {} ms ({} BPM).\n'.format(milliseconds_space, 60000 / milliseconds_space)
+    print 'Morse code translation will begin when you make your first .', \
+          '\nA new letter will begin to be interpreted when the duration between taps is greater than or equal to {} ms ({} BPM).\n'.format(milliseconds_space_dash, 60000 / milliseconds_space_dash)
 
 
 def detect_bpm(verbose, gpio, period, max_bpm):
-    sleep_time = 1 / max_bpm # Calculate minimum sleep duration possible to detect the maximum BPM
+    sleep_time = 1 / max_bpm  # Calculate minimum sleep duration possible to detect the maximum BPM
     beat_count_period = 1
     duration_average = 0
+    detected_milliseconds = 0
     first_beat = True
 
     # Wait until the button is pressed for the first time
@@ -37,8 +37,6 @@ def detect_bpm(verbose, gpio, period, max_bpm):
         time.sleep(0.01)
 
     start_time = time_between_beatcount = int(round(time.time()*1000))
-    end_time = 0
-    detected_milliseconds = 0
     print 'Beat number {}, time now: {}'.format(beat_count_period, start_time)
     beat_count_period += 1
 

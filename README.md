@@ -6,6 +6,6 @@ Python BPM counter and Morse code translator, for use with a telegraph (push-but
 
 [Raspberry Pi GROUND] ----- [Telegraph or Push-Button] ----- [Rapsberry Pi GPIO]
 
-### Help with command line options
+### Command line options
 
 ./beatbybeat --help
