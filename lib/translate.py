@@ -8,21 +8,24 @@ import RPi.GPIO as GPIO
 import time
 
 def morse_translator(verbose, gpio, period, max_bpm):
-    print '\nA tempo needs to be set to determine to the duration of spaces, dashes, and dots.', \
-          '\nTap a tempo to identify the duration between letters (spaces).', \
+    print '\nA tempo needs to be set to determine the duration of dashes and dots and between new words and letters.', \
+          '\nBegin tapping a tempo to set the duration between letters.', \
           '\nTiming will begin upon the first buttom press and be measured for {} milliseconds.\n'.format(period)
     
     milliseconds_space_dash = detect_bpm(verbose, gpio, period, max_bpm)
     milliseconds_dot = milliseconds_space_dash / 3
+    milliseconds_between_words = milliseconds_dot * 7
     print '\nTempo acquired (ms = milliseconds, BPM = beats per minute):'
-    print 'Space: {} ms ({} BPM)'.format(milliseconds_space_dash, 60000 / milliseconds_space_dash)
+    print 'Between words: {} ms ({} BPM)'.format(milliseconds_between_words, 60000 / milliseconds_between_words)
+    print 'Between letters: {} ms ({} BPM)'.format(milliseconds_space_dash, 60000 / milliseconds_space_dash)
     print 'Dash: {} ms ({} BPM)'.format(milliseconds_space_dash, 60000 / milliseconds_space_dash)
     print 'Dot: {} ms ({} BPM)'.format(milliseconds_dot, 60000 / milliseconds_dot)
     print '\nWait 5 seconds before beginning Morse code...\n'
     time.sleep(5)
     
-    print 'Morse code translation will begin when you make your first .', \
-          '\nA new letter will begin to be interpreted when the duration between taps is greater than or equal to {} ms ({} BPM).\n'.format(milliseconds_space_dash, 60000 / milliseconds_space_dash)
+    print 'Ready! Morse code translation will begin automatically.'
+    print 'A new letter will begin when the duration between taps is greater than or equal to {} ms ({} BPM).'.format(milliseconds_space_dash, 60000 / milliseconds_space_dash)
+    print 'A new word will begin when the duration between taps is greater than or equal to {} ms ({} BPM).\n'.format(milliseconds_between_words, 60000 / milliseconds_between_words)
 
 
 def detect_bpm(verbose, gpio, period, max_bpm):
