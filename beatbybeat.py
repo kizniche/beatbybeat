@@ -13,8 +13,8 @@ import sys
 def menu():
     parser = argparse.ArgumentParser(description='Beat counter (bpm) and Morse code translator')
 
-    beat_counter = parser.add_argument_group('Beat counter controls')
-    beat_counter.add_argument('-c', '--count', action='store_true',
+    beat_counter = parser.add_argument_group('Beat counter')
+    beat_counter.add_argument('-b', '--bpmcount', action='store_true',
                               help="Start program to count beats (bpm)")
 
     beat_counter.add_argument('-m','--maxbpm', metavar='MAXBPM', type=int,
@@ -27,15 +27,16 @@ def menu():
                               default=5000,
                               required=False)
 
-    morse_translator = parser.add_argument_group('Beat counter controls')
-    morse_translator.add_argument('-t', '--translate', action='store_true',
-                              help="Start program to translate Morse code")
+    morse_translator = parser.add_argument_group('Morse code translator')
+    morse_translator.add_argument('-mt', '--morsetotext', action='store_true',
+                              help="Translate Morse code to text")
 
+    morse_translator.add_argument('-tm', '--texttomorse', action='store_true',
+                              help="Translate text to Morse code")
 
-    misc_options = parser.add_argument_group('Misc.')
+    misc_options = parser.add_argument_group('Miscelaneous')
     misc_options.add_argument('-g','--gpio', metavar='GPIO', type=int,
-                              help='Pin connected to the telegraph (using BCM numbering)',
-                              required=True)
+                              help='GPIO pin connected to the telegraph (using BCM numbering)')
 
     misc_options.add_argument('-v', '--verbose', action='store_true',
                               help="Print more information to the terminal")
@@ -48,16 +49,27 @@ def menu():
     #                                      #
     ########################################
 
-    if not (args.count or args.translate):
-        parser.error('No action requested, add --count or --translate')
-    elif args.count and args.translate:
-        parser.error('Cannot select both --count and --translate, only select one')
-    elif args.count:
-        print 'Starting mode: Beats per minute (BPM) counter',
-    elif args.translate:
-        print 'Starting mode: Morse code translator',
+    if not (args.bpmcount or args.morsetotext or args.texttomorse):
+        parser.error('No action requested, add --bpmcount or --morsetotext or --texttomorse')
+    elif sum(map(bool, [args.bpmcount, args.morsetotext, args.texttomorse])) != 1:
+        parser.error('Can only select one: --bpmcount (-b), --morsetotext (-mt), or --texttomorse (-tm)')
+    elif args.bpmcount:
+        if not args.gpio:
+            parser.error('Need to specify GPIO pin with --gpio')
+        else:
+            print 'Beats per minute (BPM) counter',
+    elif args.morsetotext:
+        if not args.gpio:
+            parser.error('Need to specify GPIO pin with --gpio')
+        else:
+            print 'Morse code to text translator',
+    elif args.texttomorse:
+        print 'Text to Morse code translator',
 
-    print '(Verbose {})'.format(args.verbose)
+    if args.verbose:
+        print '(Verbose)'
+    else:
+        print ''
 
     ########################################
     #                                      #
@@ -77,23 +89,32 @@ def menu():
 
     ########################################
     #                                      #
-    #         Start Beat Counter           #
+    #             Beat Counter             #
     #                                      #
     ########################################
 
-    if args.count:
+    if args.bpmcount:
         print 'BPM calculation period: {} milliseconds, Max BPM: {} BPM'.format(args.period, args.maxbpm)
         beatcount.beat_counter(args.verbose, args.gpio, args.period, args.maxbpm)
 
     ########################################
     #                                      #
-    #      Start Morse Code Translator     #
+    #    Morse Code to Text Translator     #
     #                                      #
     ########################################
 
-    if args.translate:
+    if args.morsetotext:
         print 'BPM calculation period: {} milliseconds, Max BPM: {} BPM'.format(args.period, args.maxbpm)
-        translate.morse_translator(args.verbose, args.gpio, args.period, args.maxbpm)
+        translate.morse_to_text(args.verbose, args.gpio, args.period, args.maxbpm)
+
+    ########################################
+    #                                      #
+    #    Text to Morse Code Translator     #
+    #                                      #
+    ########################################
+
+    if args.texttomorse:
+        translate.text_to_morse()
 
 
 if __name__ == "__main__":

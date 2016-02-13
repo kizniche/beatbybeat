@@ -45,11 +45,30 @@ letters_to_morse = {
     "8" : "---..",
     "9" : "----.",
     "0" : "-----",
+    " " : "/",
+    "." : ".-.-.-",
+    "," : "--..--",
+    "?" : "..--..",
+    "'" : ".----.",
+    "!" : "-.-.--",
+    "/" : "-..-.",
+    "(" : "-.--.",
+    ")" : "-.--.-",
+    "&" : ".-...",
+    ":" : "---...",
+    ";" : "-.-.-.",
+    "=" : "-...-",
+    "+" : ".-.-.",
+    "-" : "-....-",
+    "_" : "..--.-",
+    "\"" : ".-..-.",
+    "$" : "..-..-",
+    "@" : ".--.-.",
     }
 
 morse_to_letters = dict((v,k) for (k,v) in letters_to_morse.items())
 
-def morse_translator(verbose, gpio, period, max_bpm):
+def morse_to_text(verbose, gpio, period, max_bpm):
     print '\nA tempo needs to be set to determine the duration of dashes and dots and between words and letters.', \
           '\nBegin tapping a tempo to set the duration between letters.', \
           '\nTiming will begin upon the first buttom press and be measured for {} milliseconds.\n'.format(period)
@@ -133,6 +152,24 @@ def morse_translator(verbose, gpio, period, max_bpm):
             print '[ ]',
             char_in_morse = ""
         sys.stdout.flush()
+
+
+def text_to_morse():
+    while True:
+        text_input = raw_input("Enter text (A-Z, 0-9, spaces) to translate to Morse code: ")
+
+        string_valid = True
+        for letter in text_input:
+            if letter.upper() not in letters_to_morse:
+                string_valid = False
+                
+        if string_valid:
+            for letter in text_input:
+                print '{}'.format(letters_to_morse[letter.upper()]),
+        else:
+            print 'Invalid string. Only A-Z, 0-9, and spaces are allowed.',
+
+        print '\n'
 
 
 def detect_bpm(verbose, gpio, period, max_bpm):
