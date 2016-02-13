@@ -5,6 +5,7 @@
 #
 
 import RPi.GPIO as GPIO
+import sys
 import time
 
 letters_to_morse = {
@@ -53,13 +54,13 @@ def morse_translator(verbose, gpio, period, max_bpm):
           '\nBegin tapping a tempo to set the duration between letters.', \
           '\nTiming will begin upon the first buttom press and be measured for {} milliseconds.\n'.format(period)
 
+    milliseconds_space_dash = detect_bpm(verbose, gpio, period, max_bpm)
     milliseconds_dot = milliseconds_space_dash / 3
+    milliseconds_between_words = milliseconds_dot * 7
+
+    milliseconds_dash_error_high = (milliseconds_space_dash + milliseconds_between_words) / 2
     milliseconds_dot_error_high = (milliseconds_dot + milliseconds_space_dash) / 2
 
-    milliseconds_space_dash = detect_bpm(verbose, gpio, period, max_bpm)
-    milliseconds_dash_error_high = (milliseconds_space_dash + milliseconds_between_words) / 2
-
-    milliseconds_between_words = milliseconds_dot * 7
     print '\nDurations acquired (ms = milliseconds):'
     print 'Between words: {} ms'.format(milliseconds_between_words)
     print 'Between letters: {} ms'.format(milliseconds_space_dash)
@@ -76,42 +77,53 @@ def morse_translator(verbose, gpio, period, max_bpm):
     milliseconds_pressed = 0
     milliseconds_unpressed = 0
     unpressed_char = [] # Determines if there is a new letter or space
-    char_in_morse = [] # Holds "-" and "."
+    char_in_morse = "" # Holds "-" and "."
 
-    while GPIO.input(gpio): # Wait while the button is not pressed (i.e. wait for the first press)
-        time.sleep(0.01)
+    while GPIO.input(gpio): # while the button is not pressed
+            time.sleep(0.01)
 
-    while True:
+    while True:  
         time_pressed = int(round(time.time()*1000)) # Begin timing how long the button is pressed
+        
+        while GPIO.input(gpio) == False: # while the button is pressed
+            time.sleep(sleep_time)
 
-        # Duration between beats must be greater than or equal to the duration of max BPM in milliseconds
-        # This is used to prevent "accidental" taps (~20 milliseconds)
-        if int(round(time.time()*1000)) - time_pressed >= 60000 / max_bpm:
+        milliseconds_pressed = int(round(time.time()*1000)) - time_pressed # How long was the button was pressed
+        
+        if verbose:
+            print 'Pressed {} ms'.format(milliseconds_pressed),
+        if milliseconds_dot_error_high > milliseconds_pressed > 50: # If within error of dot duration, append dot
+            char_in_morse = char_in_morse + "."
+            print '.',
+        elif milliseconds_dash_error_high > milliseconds_pressed > milliseconds_dot_error_high: # append dash
+            char_in_morse = char_in_morse + "-"
+            print '-',
+        else:
+            if verbose:
+                print ''
+        sys.stdout.flush()
 
-            if GPIO.input(gpio) == False: # The button is pressed
-                milliseconds_pressed = int(round(time.time()*1000)) - time_pressed # How long was the button was pressed
+        time_pressed = int(round(time.time()*1000)) # Begin timing how long the button is unpressed
 
-                if milliseconds_dot_error_high > milliseconds_pressed > 60000 / max_bpm: # If within error of dot duration, append dot
-                    char_in_morse = char_in_morse + "."
-                    print '.',
-                elif milliseconds_dash_error_high > milliseconds_pressed > milliseconds_dot_error_high: # append dash
-                    char_in_morse = char_in_morse + "-"
-                    print '-',
+        while GPIO.input(gpio): # while the button is not pressed
+            time.sleep(0.01)
 
-                time_pressed = int(round(time.time()*1000)) # Begin timing how long the button is unpressed
+        milliseconds_unpressed = int(round(time.time()*1000)) - time_pressed # How long was the button was unpressed
+        if verbose:
+            print 'Unpressed {} ms'.format(milliseconds_unpressed)
 
-                while GPIO.input(gpio) == False: # Wait while the button is pressed
-                    time.sleep(sleep_time)
-
-                milliseconds_unpressed = int(round(time.time()*1000)) - time_pressed # How long was the button was unpressed
-
-                if milliseconds_dash_error_high > milliseconds_unpressed > milliseconds_dot_error_high:
-                    unpressed_char = "letter"
-                else:
-                    unpressed_char = "space"
-
-
-        time.sleep(sleep_time)
+        if milliseconds_dash_error_high > milliseconds_unpressed > milliseconds_dot_error_high:
+            # unpressed_char = "letter"
+            if char_in_morse in morse_to_letters:
+                print '/ {} /'.format(morse_to_letters[char_in_morse]),
+            else:
+                print '/ NA /',
+            char_in_morse = ""
+        elif milliseconds_unpressed > milliseconds_dash_error_high:
+            # unpressed_char = "space"
+            print '/  /',
+            char_in_morse = ""
+        sys.stdout.flush()
 
 
 def detect_bpm(verbose, gpio, period, max_bpm):
@@ -122,16 +134,18 @@ def detect_bpm(verbose, gpio, period, max_bpm):
     first_beat = True
 
     # Wait until the button is pressed for the first time
-    while GPIO.input(gpio):
+    while GPIO.input(gpio): # While button is not pressed
         time.sleep(0.01)
 
     start_time = time_between_beatcount = int(round(time.time()*1000))
-    print 'Beat number {}, time now: {}'.format(beat_count_period, start_time)
+    if verbose:
+        print 'Beat number {}, Time: {}'.format(beat_count_period, start_time)
 
     while not detected_milliseconds:
         # Duration between beats must be greater than or equal to the duration of max BPM in milliseconds
         if int(round(time.time()*1000)) - time_between_beatcount >= 60000 / max_bpm:
-            if GPIO.input(gpio) == False:
+
+            if GPIO.input(gpio) == False: # If button is pressed
                 time_now = int(round(time.time()*1000))
                 beat_count_period += 1
 
