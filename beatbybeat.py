@@ -64,7 +64,7 @@ def menu():
         else:
             print 'Morse code to text translator',
     elif args.texttomorse:
-        print 'Text to Morse code translator',
+        print 'Text to Morse code translator (use only A-Z, 0-9, spaces, and symbols /?\'!@$&()_-+=,.;:")',
 
     if args.verbose:
         print '(Verbose)'

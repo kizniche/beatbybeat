@@ -8,6 +8,7 @@ import RPi.GPIO as GPIO
 import sys
 import time
 
+# Morse Code Dictionary
 letters_to_morse = {
     "A" : ".-",
     "B" : "-...",
@@ -100,26 +101,25 @@ def morse_to_text(verbose, gpio, period, max_bpm):
     sleep_time = 1 / max_bpm  # Calculate minimum sleep duration possible to detect the maximum BPM
     milliseconds_pressed = 0
     milliseconds_unpressed = 0
-    unpressed_char = [] # Determines if there is a new letter or space
-    char_in_morse = "" # Holds "-" and "."
+    char_in_morse = ""  # Holds string of "-" and "."
 
-    while GPIO.input(gpio): # while the button is not pressed
-            time.sleep(0.01)
+    while GPIO.input(gpio):  # while the button is not pressed
+        time.sleep(0.01)
 
     while True:  
-        time_pressed = int(round(time.time()*1000)) # Begin timing how long the button is pressed
+        time_pressed = int(round(time.time()*1000))  # Begin timing how long the button is pressed
         
-        while GPIO.input(gpio) == False or int(round(time.time()*1000)) - time_pressed < 60000 / max_bpm: # while the button is pressed
+        while GPIO.input(gpio) == False or int(round(time.time()*1000)) - time_pressed < 60000 / max_bpm:  # while pressed
             time.sleep(sleep_time)
 
-        milliseconds_pressed = int(round(time.time()*1000)) - time_pressed # How long was the button was pressed
+        milliseconds_pressed = int(round(time.time()*1000)) - time_pressed  # How long the button was pressed
         
         if verbose:
             print 'Pressed {} ms'.format(milliseconds_pressed),
-        if milliseconds_dot_error_high > milliseconds_pressed > 50: # If within error of dot duration, append dot
+        if milliseconds_dot_error_high > milliseconds_pressed > 50:  # Append Dot
             char_in_morse = char_in_morse + "."
             print '.',
-        elif milliseconds_dash_error_high > milliseconds_pressed > milliseconds_dot_error_high: # append dash
+        elif milliseconds_dash_error_high > milliseconds_pressed > milliseconds_dot_error_high:  # Append Dash
             char_in_morse = char_in_morse + "-"
             print '-',
         else:
@@ -127,24 +127,22 @@ def morse_to_text(verbose, gpio, period, max_bpm):
                 print ''
         sys.stdout.flush()
 
-        time_pressed = int(round(time.time()*1000)) # Begin timing how long the button is unpressed
+        time_pressed = int(round(time.time()*1000))  # Begin timing how long the button is unpressed
 
-        while GPIO.input(gpio) or int(round(time.time()*1000)) - time_pressed < 60000 / max_bpm: # while the button is not pressed
+        while GPIO.input(gpio) or int(round(time.time()*1000)) - time_pressed < 60000 / max_bpm:  # while not pressed
             time.sleep(0.01)
 
-        milliseconds_unpressed = int(round(time.time()*1000)) - time_pressed # How long was the button was unpressed
+        milliseconds_unpressed = int(round(time.time()*1000)) - time_pressed  # How long the button was not pressed
         if verbose:
             print 'Unpressed {} ms'.format(milliseconds_unpressed)
 
         if milliseconds_dash_error_high > milliseconds_unpressed > milliseconds_dot_error_high:
-            # unpressed_char = "letter"
             if char_in_morse in morse_to_letters:
                 print '[{}]'.format(morse_to_letters[char_in_morse]),
             else:
                 print '[NA]',
             char_in_morse = ""
         elif milliseconds_unpressed > milliseconds_dash_error_high:
-            # unpressed_char = "space"
             if char_in_morse in morse_to_letters:
                 print '[{}]'.format(morse_to_letters[char_in_morse]),
             else:
@@ -156,7 +154,7 @@ def morse_to_text(verbose, gpio, period, max_bpm):
 
 def text_to_morse():
     while True:
-        text_input = raw_input("Enter text (A-Z, 0-9, spaces) to translate to Morse code: ")
+        text_input = raw_input("Enter text to translate to Morse code: ")
 
         string_valid = True
         for letter in text_input:
@@ -167,20 +165,19 @@ def text_to_morse():
             for letter in text_input:
                 print '{}'.format(letters_to_morse[letter.upper()]),
         else:
-            print 'Invalid string. Only A-Z, 0-9, and spaces are allowed.',
-
+            print 'Invalid string. Only A-Z, 0-9, spaces, and certain symbols are allowed.',
         print '\n'
 
 
 def detect_bpm(verbose, gpio, period, max_bpm):
-    sleep_time = 1 / max_bpm  # Calculate minimum sleep duration possible to detect the maximum BPM
+    sleep_time = 1 / max_bpm   # Calculate minimum sleep duration possible to detect the maximum BPM
     beat_count_period = 1
     duration_total = 0
     detected_milliseconds = 0
     first_beat = True
 
     # Wait until the button is pressed for the first time
-    while GPIO.input(gpio): # While button is not pressed
+    while GPIO.input(gpio):  # While button is not pressed
         time.sleep(0.01)
 
     start_time = time_between_beatcount = int(round(time.time()*1000))
@@ -194,7 +191,7 @@ def detect_bpm(verbose, gpio, period, max_bpm):
         # Duration between beats must be greater than or equal to the duration of max BPM in milliseconds
         if int(round(time.time()*1000)) - time_between_beatcount >= 60000 / max_bpm:
 
-            if GPIO.input(gpio) == False: # If button is pressed
+            if GPIO.input(gpio) == False:  # If button is pressed
                 time_now = int(round(time.time()*1000))
                 beat_count_period += 1
 
