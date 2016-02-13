@@ -66,12 +66,17 @@ def morse_translator(verbose, gpio, period, max_bpm):
     print 'Between letters: {} ms'.format(milliseconds_space_dash)
     print 'Dash: {} ms'.format(milliseconds_space_dash)
     print 'Dot: {} ms'.format(milliseconds_dot)
-    print '\nWait 5 seconds before beginning Morse code...\n'
-    time.sleep(5)
     
-    print 'Ready! Morse code translation will begin automatically.'
-    print 'A new letter will begin when the duration between dashes or dots is greater than or equal to {} ms.'.format(milliseconds_space_dash)
-    print 'A new word will begin when the duration between dashes or dots is greater than or equal to {} ms.\n'.format(milliseconds_between_words)
+    print '\nA Dot will register when the pressed duration is between {} and {} ms'.format(60000 / max_bpm, milliseconds_dot_error_high)
+    print 'A Dash will register when the pressed duration is between {} and {} ms'.format(milliseconds_dot_error_high, milliseconds_dash_error_high)
+    print 'A new letter will register when the unpressed duration is between between {} and {} ms'.format(milliseconds_dot_error_high, milliseconds_dash_error_high)
+    print 'A new word will register when the unpressed duration is greater than {} ms'.format(milliseconds_dash_error_high)
+
+    print '\nWait 5 seconds before beginning Morse code...\n'
+
+    time.sleep(5)
+
+    print 'Ready! Morse code translation will begin automatically.\n'
 
     sleep_time = 1 / max_bpm  # Calculate minimum sleep duration possible to detect the maximum BPM
     milliseconds_pressed = 0
@@ -85,7 +90,7 @@ def morse_translator(verbose, gpio, period, max_bpm):
     while True:  
         time_pressed = int(round(time.time()*1000)) # Begin timing how long the button is pressed
         
-        while GPIO.input(gpio) == False: # while the button is pressed
+        while GPIO.input(gpio) == False or int(round(time.time()*1000)) - time_pressed < 60000 / max_bpm: # while the button is pressed
             time.sleep(sleep_time)
 
         milliseconds_pressed = int(round(time.time()*1000)) - time_pressed # How long was the button was pressed
@@ -105,7 +110,7 @@ def morse_translator(verbose, gpio, period, max_bpm):
 
         time_pressed = int(round(time.time()*1000)) # Begin timing how long the button is unpressed
 
-        while GPIO.input(gpio): # while the button is not pressed
+        while GPIO.input(gpio) or int(round(time.time()*1000)) - time_pressed < 60000 / max_bpm: # while the button is not pressed
             time.sleep(0.01)
 
         milliseconds_unpressed = int(round(time.time()*1000)) - time_pressed # How long was the button was unpressed
@@ -115,13 +120,17 @@ def morse_translator(verbose, gpio, period, max_bpm):
         if milliseconds_dash_error_high > milliseconds_unpressed > milliseconds_dot_error_high:
             # unpressed_char = "letter"
             if char_in_morse in morse_to_letters:
-                print '/ {} /'.format(morse_to_letters[char_in_morse]),
+                print '[{}]'.format(morse_to_letters[char_in_morse]),
             else:
-                print '/ NA /',
+                print '[NA]',
             char_in_morse = ""
         elif milliseconds_unpressed > milliseconds_dash_error_high:
             # unpressed_char = "space"
-            print '/  /',
+            if char_in_morse in morse_to_letters:
+                print '[{}]'.format(morse_to_letters[char_in_morse]),
+            else:
+                print '[NA]',
+            print '[ ]',
             char_in_morse = ""
         sys.stdout.flush()
 
@@ -140,6 +149,9 @@ def detect_bpm(verbose, gpio, period, max_bpm):
     start_time = time_between_beatcount = int(round(time.time()*1000))
     if verbose:
         print 'Beat number {}, Time: {}'.format(beat_count_period, start_time)
+    else:
+        print '.',
+        sys.stdout.flush()
 
     while not detected_milliseconds:
         # Duration between beats must be greater than or equal to the duration of max BPM in milliseconds
@@ -156,6 +168,9 @@ def detect_bpm(verbose, gpio, period, max_bpm):
                     duration_total = (int(round(time.time()*1000)) - time_between_beatcount) + duration_total
                 if verbose:
                     print 'Beat number {}, Time: {}, Diff: {} ms, Average: {} ms'.format(beat_count_period, time_now, time_now - time_between_beatcount, duration_total / (beat_count_period - 1))
+                else:
+                    print '.',
+                    sys.stdout.flush()
 
                 time_between_beatcount = time_now
                 while GPIO.input(gpio) == False:
@@ -164,5 +179,8 @@ def detect_bpm(verbose, gpio, period, max_bpm):
         if int(round(time.time()*1000)) - start_time > period:
             detected_milliseconds = duration_total / (beat_count_period - 1)
         time.sleep(sleep_time)
+
+    if not verbose:
+        print 'Done!'
 
     return detected_milliseconds

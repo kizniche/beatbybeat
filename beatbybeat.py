@@ -18,8 +18,8 @@ def menu():
                               help="Start program to count beats (bpm)")
 
     beat_counter.add_argument('-m','--maxbpm', metavar='MAXBPM', type=int,
-                              help='Set maximum detectable BPM (lower number improves accuracy, higher numbers may register erroneous taps, below 1000 should be accurate), default: 500',
-                              default=500,
+                              help='Set maximum detectable BPM (lower number improves accuracy, higher numbers may register erroneous taps, below 1000 should be accurate), default: 800',
+                              default=800,
                               required=False)
 
     beat_counter.add_argument('-p','--period', metavar='PERIOD', type=int,
