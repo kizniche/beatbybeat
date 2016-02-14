@@ -22,7 +22,7 @@ A calibration is required to determine the duration of a dash (and for the space
 [Raspberry Pi GROUND] ----- [Telegraph or Push-Button] ----- [Rapsberry Pi GPIO]
 
 Connect a capacitor to each lead of the button to lessen button bounce (debounce).
-An internal pullup resistor is activated in software, but another resistor can be connected in series to ensure no excess current can damamge your device (10k should be sufficient).
+An internal pullup resistor is activated in software, but another resistor (10k should be sufficient) may be connected in series to prevent excess current from damaging your device, should the internal reisistor fail to activate.
 
 ### Command Line Options
 
