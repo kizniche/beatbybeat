@@ -13,13 +13,16 @@ A calibration is required to determine the duration of a dash (and for the space
 ### Features
 
 * Translate from Morse code to text (requires input device)
-* Translate from text to Morse code
-* Calculate how long it would take to transmit Morse code from the imput text
 * Calculate beats per minute from tapping (requires input device)
+* Translate from text to Morse code
+* Calculate how long it would take to transmit Morse code from the input text
 
 ### Wiring Schematic
 
 [Raspberry Pi GROUND] ----- [Telegraph or Push-Button] ----- [Rapsberry Pi GPIO]
+
+Connect a capacitor to each lead of the button to lessen button bounce (debounce).
+An internal pullup resistor is activated in software, but another resistor can be connected in series to ensure no excess current can damamge your device (10k should be sufficient).
 
 ### Command Line Options
 
