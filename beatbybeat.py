@@ -119,7 +119,7 @@ def menu():
     ########################################
 
     if args.texttomorse:
-        print 'Dash duration: {} ms\n'.format(args.dashduration)
+        print 'Dash duration: {} ms'.format(args.dashduration)
         translate.text_to_morse(args.dashduration)
 
 

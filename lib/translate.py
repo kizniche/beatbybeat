@@ -188,6 +188,7 @@ def morse_to_text(verbose, gpio, period, max_bpm):
 
 def text_to_morse(dashduration):
     while True:
+        print ''
         text_input = raw_input("Enter text to translate to Morse code: ")
 
         string_valid = True
@@ -203,7 +204,6 @@ def text_to_morse(dashduration):
             print '\nTime to transmit (dash = {} ms): {} ms'.format(dashduration, total_duration)
         else:
             print 'Invalid string. Only A-Z, 0-9, spaces, and certain symbols are allowed.',
-        print '\n'
 
 
 def letter_duration(dashduration, morse_letter_code):
