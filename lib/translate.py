@@ -46,6 +46,16 @@ letters_to_morse = {
     "8" : "---..",
     "9" : "----.",
     "0" : "-----",
+    "AA/New Line" : ".-.-",
+    "AR/New Page" : ".-.-.",
+    "AS/WAIT" : ".-...",
+    "BT/New Paragraph" : "-...-",
+    "HH/ERROR" : "........",
+    "KN/OK, Named" : "-.--.",
+    "SK/End Contact" : "...-.-",
+    "SN/Understood" : "...-.",
+    "SOS" : "...---...",
+    "BK/Break" : "",
     " " : "/",
     "." : ".-.-.-",
     "," : "--..--",
@@ -59,7 +69,7 @@ letters_to_morse = {
     ":" : "---...",
     ";" : "-.-.-.",
     "=" : "-...-",
-    "+" : ".-.-.",
+    "+/ATTENTION" : ".-.-.",
     "-" : "-....-",
     "_" : "..--.-",
     "\"" : ".-..-.",
@@ -176,7 +186,7 @@ def morse_to_text(verbose, gpio, period, max_bpm):
             print 'Unpressed {} ms'.format(int(round(time.time()*1000)) - button_duration)
 
 
-def text_to_morse():
+def text_to_morse(dashduration):
     while True:
         text_input = raw_input("Enter text to translate to Morse code: ")
 
@@ -186,11 +196,34 @@ def text_to_morse():
                 string_valid = False
                 
         if string_valid:
+            total_duration = 0
             for letter in text_input:
                 print '{}'.format(letters_to_morse[letter.upper()]),
+                total_duration = total_duration + letter_duration(dashduration, letters_to_morse[letter.upper()])
+            print '\nTime to transmit (dash = {} ms): {} ms'.format(dashduration, total_duration)
         else:
             print 'Invalid string. Only A-Z, 0-9, spaces, and certain symbols are allowed.',
         print '\n'
+
+
+def letter_duration(dashduration, morse_letter_code):
+    total_duration = 0
+    for unit in morse_letter_code:
+        if unit == "-":
+            total_duration = total_duration + dashduration
+        elif unit == ".":
+            total_duration = total_duration + (dashduration / 3)
+        elif unit == "/":
+            total_duration = total_duration + (dashduration / 3 * 7)
+
+        # Add duration between letters
+        first = True
+        if first:
+            first = False
+        else: 
+            total_duration = total_duration + dashduration
+
+    return total_duration
 
 
 def detect_bpm(verbose, gpio, period, max_bpm):

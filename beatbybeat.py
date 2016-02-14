@@ -34,6 +34,11 @@ def menu():
     morse_translator.add_argument('-tm', '--texttomorse', action='store_true',
                               help="Translate text to Morse code")
 
+    morse_translator.add_argument('-d','--dashduration', metavar='DASHDURATION', type=int,
+                              help='Duratin of a dash when calculating time to transmit a message (used in translation of text to Morse), default: 300 ms',
+                              default=300,
+                              required=False)
+
     misc_options = parser.add_argument_group('Miscelaneous')
     misc_options.add_argument('-g','--gpio', metavar='GPIO', type=int,
                               help='GPIO pin connected to the telegraph (using BCM numbering)')
@@ -114,7 +119,8 @@ def menu():
     ########################################
 
     if args.texttomorse:
-        translate.text_to_morse()
+        print 'Dash duration: {} ms\n'.format(args.dashduration)
+        translate.text_to_morse(args.dashduration)
 
 
 if __name__ == "__main__":
