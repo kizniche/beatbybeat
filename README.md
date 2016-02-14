@@ -18,7 +18,7 @@ A calibration is required to determine the duration of a dash (and for the space
 ### Screenshots
 
 Morse code to text (from telegraph as an input device):
-<a href="http://kylegabriel.com/projects/wp-content/uploads/sites/3/2016/02/beatbybeat-Morse-code-translator-04.png" target="_blank"><img src="http://kylegabriel.com/projects/wp-content/uploads/sites/3/2016/02/beatbybeat-Morse-code-translator-04.png"></a>
+<a href="http://kylegabriel.com/projects/wp-content/uploads/sites/3/2016/02/beatbybeat-Morse-code-translator-07.png" target="_blank"><img src="http://kylegabriel.com/projects/wp-content/uploads/sites/3/2016/02/beatbybeat-Morse-code-translator-07.png"></a>
 
 Text to Morse code:
 <a href="http://kylegabriel.com/projects/wp-content/uploads/sites/3/2016/02/beatbybeat-Morse-code-translator-06.png" target="_blank"><img src="http://kylegabriel.com/projects/wp-content/uploads/sites/3/2016/02/beatbybeat-Morse-code-translator-06.png"></a>

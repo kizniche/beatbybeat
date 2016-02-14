@@ -35,8 +35,8 @@ def menu():
                               help="Translate text to Morse code")
 
     morse_translator.add_argument('-d','--dashduration', metavar='DASHDURATION', type=int,
-                              help='Duratin of a dash when calculating time to transmit a message (used in translation of text to Morse), default: 300 ms',
-                              default=300,
+                              help='Duration of a dash (Morse-to-text default: none, Text-to-Morse default: 300 ms). If set with -mt the tempo detection will be overridden.',
+                              default=0,
                               required=False)
 
     misc_options = parser.add_argument_group('Miscelaneous')
@@ -110,7 +110,7 @@ def menu():
 
     if args.morsetotext:
         print 'Tempo calculation period: {} milliseconds, Max BPM: {} BPM'.format(args.period, args.maxbpm)
-        translate.morse_to_text(args.verbose, args.gpio, args.period, args.maxbpm)
+        translate.morse_to_text(args.verbose, args.gpio, args.period, args.maxbpm, args.dashduration)
 
     ########################################
     #                                      #
@@ -119,8 +119,11 @@ def menu():
     ########################################
 
     if args.texttomorse:
-        print 'Dash duration: {} ms'.format(args.dashduration)
-        translate.text_to_morse(args.dashduration)
+        dashduration = args.dashduration
+        if not dashduration:
+            dashduration = 300  # Default dash time (milliseconds)
+        print 'Dash duration: {} ms'.format(dashduration)
+        translate.text_to_morse(dashduration)
 
 
 if __name__ == "__main__":

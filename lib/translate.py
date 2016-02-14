@@ -79,18 +79,22 @@ letters_to_morse = {
 
 morse_to_letters = dict((v,k) for (k,v) in letters_to_morse.items())
 
-def morse_to_text(verbose, gpio, period, max_bpm):
+def morse_to_text(verbose, gpio, period, max_bpm, dashduration):
     sleep_time = 1 / max_bpm  # Calculate minimum sleep duration possible to detect the maximum BPM
     debounce_delay = 60000 / max_bpm
     milliseconds_pressed = 0
     char_in_morse = ""  # Holds string of "-" and "."
 
-    print '\nThe duration of dashes and dots and between words and letters needs to be determined.', \
-          '\nBegin tapping a tempo to set the duration of a dash (also space between letters).', \
-          '\nTiming will begin upon the first buttom press and be measured for {} milliseconds.\n'.format(period)
+    if not dashduration:
+        print '\nThe duration of dashes and dots and between words and letters needs to be determined.', \
+              '\nBegin tapping a tempo to set the duration of a dash (also space between letters).', \
+              '\nTiming will begin upon the first buttom press and be measured for {} milliseconds.\n'.format(period)
 
-    # Calculate the exact durations for a dot, dash, letter space, and word space
-    milliseconds_space_dash = detect_bpm(verbose, gpio, period, max_bpm)
+        # Calculate the exact durations for a dot, dash, letter space, and word space
+        milliseconds_space_dash = detect_bpm(verbose, gpio, period, max_bpm)
+    else:
+        milliseconds_space_dash = dashduration
+
     milliseconds_dot = milliseconds_space_dash / 3
     milliseconds_between_words = milliseconds_dot * 7
 
