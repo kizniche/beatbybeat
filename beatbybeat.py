@@ -18,8 +18,8 @@ def menu():
                               help="Start program to count beats (bpm)")
 
     beat_counter.add_argument('-m','--maxbpm', metavar='MAXBPM', type=int,
-                              help='Set maximum detectable BPM (lower number improves accuracy, higher numbers may register erroneous taps, below 1000 should be accurate), default: 800',
-                              default=800,
+                              help='Set maximum detectable BPM (lower number improves accuracy, higher numbers may register erroneous taps, below 1000 should be accurate), default: 1000',
+                              default=1000,
                               required=False)
 
     beat_counter.add_argument('-p','--period', metavar='PERIOD', type=int,
@@ -109,6 +109,8 @@ def menu():
     ########################################
 
     if args.morsetotext:
+        if args.dashduration / 3 < 60000 / args.maxbpm:
+            parser.error('--dashduration too low. Increase -d or degrease -b')
         print 'Tempo calculation period: {} milliseconds, Max BPM: {} BPM'.format(args.period, args.maxbpm)
         translate.morse_to_text(args.verbose, args.gpio, args.period, args.maxbpm, args.dashduration)
 

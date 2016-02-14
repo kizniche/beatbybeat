@@ -117,8 +117,12 @@ def morse_to_text(verbose, gpio, period, max_bpm, dashduration):
     print 'A new letter will register when the unpressed duration is between between {} and {} ms'.format(milliseconds_dot_error_high, milliseconds_dash_error_high)
     print 'A new word will register when the unpressed duration is greater than {} ms'.format(milliseconds_dash_error_high)
 
-    print '\nWait 5 seconds before beginning Morse code...\n'
-    time.sleep(5)
+    if not dashduration:
+        print '\nWait 5 seconds before beginning Morse code...\n'
+        time.sleep(5)
+    else:
+        print ''
+
     print 'Ready! Morse code translation will begin automatically.\n'
 
     while GPIO.input(gpio):  # while the button is not pressed
