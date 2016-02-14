@@ -141,10 +141,10 @@ def morse_to_text(verbose, gpio, period, max_bpm):
         # Holding a press for longer than milliseconds_dash_error_high will result in neither a dot or a dash
         if milliseconds_dot_error_high > milliseconds_pressed > 50:
             char_in_morse = char_in_morse + "."  # Append Dot to Morse code string
-            print '.',
+            sys.stdout.write('.')
         elif milliseconds_dash_error_high > milliseconds_pressed > milliseconds_dot_error_high:
             char_in_morse = char_in_morse + "-"  # Append Dash to Morse code string
-            print '-',
+            sys.stdout.write('-')
         sys.stdout.flush()
 
         #
@@ -161,9 +161,9 @@ def morse_to_text(verbose, gpio, period, max_bpm):
         # issue a letter and clear char_in_morse, the Morse code-holding string
         if int(round(time.time()*1000)) - button_duration >= milliseconds_dot_error_high:
             if char_in_morse in morse_to_letters:
-                print '[{}]'.format(morse_to_letters[char_in_morse]),
+                sys.stdout.write(' [%s] ' % morse_to_letters[char_in_morse])
             else:
-                print '[NA]',
+                sys.stdout.write(' [NA] ')
             char_in_morse = ""
             sys.stdout.flush()
 
@@ -174,7 +174,7 @@ def morse_to_text(verbose, gpio, period, max_bpm):
 
         # If the unpressed duration exceeds that for a space, issue a space
         if int(round(time.time()*1000)) - button_duration >= milliseconds_dash_error_high:
-            print '[ ]',
+            sys.stdout.write('[ ] ')
             sys.stdout.flush()
 
         # Wait while the button is unpressed
