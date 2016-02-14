@@ -70,14 +70,13 @@ letters_to_morse = {
 morse_to_letters = dict((v,k) for (k,v) in letters_to_morse.items())
 
 def morse_to_text(verbose, gpio, period, max_bpm):
-    print '\nA tempo needs to be set to determine the duration of dashes and dots and between words and letters.', \
-          '\nBegin tapping a tempo to set the duration between letters.', \
+    print '\nThe duration of dashes and dots and between words and letters needs to be determined.', \
+          '\nBegin tapping a tempo to set the duration of a dash (also space between letters).', \
           '\nTiming will begin upon the first buttom press and be measured for {} milliseconds.\n'.format(period)
 
     milliseconds_space_dash = detect_bpm(verbose, gpio, period, max_bpm)
     milliseconds_dot = milliseconds_space_dash / 3
     milliseconds_between_words = milliseconds_dot * 7
-
     milliseconds_dash_error_high = (milliseconds_space_dash + milliseconds_between_words) / 2
     milliseconds_dot_error_high = (milliseconds_dot + milliseconds_space_dash) / 2
 
@@ -93,14 +92,11 @@ def morse_to_text(verbose, gpio, period, max_bpm):
     print 'A new word will register when the unpressed duration is greater than {} ms'.format(milliseconds_dash_error_high)
 
     print '\nWait 5 seconds before beginning Morse code...\n'
-
     time.sleep(5)
-
     print 'Ready! Morse code translation will begin automatically.\n'
 
     sleep_time = 1 / max_bpm  # Calculate minimum sleep duration possible to detect the maximum BPM
     milliseconds_pressed = 0
-    milliseconds_unpressed = 0
     char_in_morse = ""  # Holds string of "-" and "."
 
     while GPIO.input(gpio):  # while the button is not pressed
@@ -122,34 +118,35 @@ def morse_to_text(verbose, gpio, period, max_bpm):
         elif milliseconds_dash_error_high > milliseconds_pressed > milliseconds_dot_error_high:  # Append Dash
             char_in_morse = char_in_morse + "-"
             print '-',
-        else:
-            if verbose:
-                print ''
+        elif verbose:
+            print ''
         sys.stdout.flush()
 
         time_pressed = int(round(time.time()*1000))  # Begin timing how long the button is unpressed
 
-        while GPIO.input(gpio) or int(round(time.time()*1000)) - time_pressed < 60000 / max_bpm:  # while not pressed
+        while (GPIO.input(gpio) or int(round(time.time()*1000)) - time_pressed < 60000 / max_bpm) and int(round(time.time()*1000)) - time_pressed < milliseconds_dot_error_high:  # while not pressed
             time.sleep(0.01)
 
-        milliseconds_unpressed = int(round(time.time()*1000)) - time_pressed  # How long the button was not pressed
-        if verbose:
-            print 'Unpressed {} ms'.format(milliseconds_unpressed)
+        if int(round(time.time()*1000)) - time_pressed > milliseconds_dot_error_high:
+            if char_in_morse in morse_to_letters:
+                print '[{}]'.format(morse_to_letters[char_in_morse]),
+            else:
+                print '[NA]',
+            char_in_morse = ""
+            sys.stdout.flush()
 
-        if milliseconds_dash_error_high > milliseconds_unpressed > milliseconds_dot_error_high:
-            if char_in_morse in morse_to_letters:
-                print '[{}]'.format(morse_to_letters[char_in_morse]),
-            else:
-                print '[NA]',
-            char_in_morse = ""
-        elif milliseconds_unpressed > milliseconds_dash_error_high:
-            if char_in_morse in morse_to_letters:
-                print '[{}]'.format(morse_to_letters[char_in_morse]),
-            else:
-                print '[NA]',
+        while GPIO.input(gpio) and int(round(time.time()*1000)) - time_pressed < milliseconds_dash_error_high:  # while not pressed
+            time.sleep(0.01)
+
+        if int(round(time.time()*1000)) - time_pressed > milliseconds_dash_error_high:
             print '[ ]',
-            char_in_morse = ""
-        sys.stdout.flush()
+            sys.stdout.flush()
+
+        while GPIO.input(gpio):  # while not pressed
+            time.sleep(0.01)
+
+        if verbose:
+            print 'Unpressed {} ms'.format(int(round(time.time()*1000)) - time_pressed)
 
 
 def text_to_morse():

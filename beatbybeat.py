@@ -94,7 +94,7 @@ def menu():
     ########################################
 
     if args.bpmcount:
-        print 'BPM calculation period: {} milliseconds, Max BPM: {} BPM'.format(args.period, args.maxbpm)
+        print 'Tempo calculation period: {} milliseconds, Max BPM: {} BPM'.format(args.period, args.maxbpm)
         beatcount.beat_counter(args.verbose, args.gpio, args.period, args.maxbpm)
 
     ########################################
@@ -104,7 +104,7 @@ def menu():
     ########################################
 
     if args.morsetotext:
-        print 'BPM calculation period: {} milliseconds, Max BPM: {} BPM'.format(args.period, args.maxbpm)
+        print 'Tempo calculation period: {} milliseconds, Max BPM: {} BPM'.format(args.period, args.maxbpm)
         translate.morse_to_text(args.verbose, args.gpio, args.period, args.maxbpm)
 
     ########################################
