@@ -10,6 +10,13 @@ Each Morse code symbol represents a character (A-Z, 0-9) and is represented by a
 
 A calibration is required to determine the duration of a dash (and for the space between letters). All other durations are calculated from this duration, and an error is applied to produce acceptable ranges for a button is pressed and when the button is not pressed.
 
+### Features
+
+* Translate from Morse code to text (requires input device)
+* Translate from text to Morse code
+* Calculate how long it would take to transmit Morse code from the imput text
+* Calculate beats per minute from tapping (requires input device)
+
 ### Wiring Schematic
 
 [Raspberry Pi GROUND] ----- [Telegraph or Push-Button] ----- [Rapsberry Pi GPIO]
