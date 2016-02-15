@@ -109,7 +109,11 @@ def menu():
     ########################################
 
     if args.morsetotext:
-        if args.dashduration / 3 < 60000 / args.maxbpm:
+        if args.dashduration == 0:
+            dashduration = 300
+        else:
+            dashduration = args.dashduration
+        if dashduration / 3 < 60000 / args.maxbpm:
             parser.error('--dashduration too low. Increase -d or degrease -b')
         print 'Tempo calculation period: {} milliseconds, Max BPM: {} BPM'.format(args.period, args.maxbpm)
         translate.morse_to_text(args.verbose, args.gpio, args.period, args.maxbpm, args.dashduration)
