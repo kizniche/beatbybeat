@@ -55,7 +55,6 @@ letters_to_morse = {
     "SK/End Contact" : "...-.-",
     "SN/Understood" : "...-.",
     "SOS" : "...---...",
-    "BK/Break" : "",
     " " : "/",
     "." : ".-.-.-",
     "," : "--..--",
