@@ -19,8 +19,8 @@ def menu():
                               help="Start program to count beats (bpm)")
 
     beat_counter.add_argument('-m','--maxbpm', metavar='MAXBPM', type=int,
-                              help='Set maximum detectable BPM (lower number improves accuracy, higher numbers may register erroneous taps, below 1000 should be accurate), default: 1000',
-                              default=1000,
+                              help='Set maximum detectable BPM (lower number improves accuracy, higher numbers may register erroneous taps, below 2000 should be accurate), default: 2000',
+                              default=2000,
                               required=False)
 
     beat_counter.add_argument('-p','--period', metavar='PERIOD', type=int,
@@ -100,7 +100,7 @@ def menu():
     ########################################
 
     if args.bpmcount:
-        print 'Tempo calculation period: {} milliseconds, Max BPM: {} BPM'.format(args.period, args.maxbpm)
+        print 'Tempo calculation period: {} milliseconds, Max BPM: {} BPM, Debounce Delay: {} ms'.format(args.period, args.maxbpm, 60000 / args.maxbpm)
         print '\nBegin tapping a tempo to identify the duration between beats.', \
               '\nCalculations will only be performed while there is tapping.', \
               '\nTiming will begin upon the first buttom press and be measured every {} milliseconds.\n'.format(args.period)
@@ -122,7 +122,7 @@ def menu():
             dashduration = args.dashduration
         if dashduration / 3 < 60000 / args.maxbpm:
             parser.error('--dashduration too low. Increase -d or degrease -b')
-        print 'Tempo calculation period: {} milliseconds, Max BPM: {} BPM'.format(args.period, args.maxbpm)
+        print 'Tempo calculation period: {} milliseconds, Max BPM: {} BPM, Debounce Delay: {} ms'.format(args.period, args.maxbpm, 60000 / args.maxbpm)
         translate.morse_to_text(args.verbose, args.gpio, args.period, args.maxbpm, args.dashduration)
 
     ########################################
