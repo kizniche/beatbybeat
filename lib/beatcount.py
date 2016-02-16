@@ -8,9 +8,9 @@ import RPi.GPIO as GPIO
 import sys
 import time
 
-def beat_counter(verbose, gpio, period, max_bpm):
-    sleep_time = 1 / max_bpm # Calculate minimum sleep duration possible to detect the maximum BPM
-    debounce_delay = 60000 / max_bpm
+def beat_counter(verbose, gpio, period, maxbpm):
+    sleep_time = 1 / maxbpm # Calculate minimum sleep duration possible to detect the maximum BPM
+    debounce_delay = 60000 / maxbpm
     beat_count_bpm = beat_count_period = 1
     duration_average = 0
     first_beat = first_beat_average = True
@@ -29,7 +29,7 @@ def beat_counter(verbose, gpio, period, max_bpm):
         if int(round(time.time()*1000)) - time_between_beatcount < period:
             if first_beat:
                 if verbose:
-                    print 'Beat number {}, Time: {}'.format(beat_count_period, time_between_beats)
+                    print 'Beat {}, Time: {}'.format(beat_count_period, time_between_beats)
                 else:
                     print '.',
                     sys.stdout.flush()
@@ -38,7 +38,7 @@ def beat_counter(verbose, gpio, period, max_bpm):
             else:
                 time_now = int(round(time.time()*1000))
                 if verbose:
-                    print 'Beat number {}, Time: {}, Diff: {}, Average: {}'.format(beat_count_period, time_now, time_now - time_between_beats, duration_average)
+                    print 'Beat {}, Time: {}, Diff: {}, Average: {}'.format(beat_count_period, time_now, time_now - time_between_beats, duration_average)
                 else:
                     print '.',
                     sys.stdout.flush()
@@ -68,4 +68,5 @@ def beat_counter(verbose, gpio, period, max_bpm):
 
         if int(round(time.time()*1000)) - time_between_beatcount > period:
             count = beat_count_period - beat_count_bpm
+            print 'Done!'
             return count, duration_average

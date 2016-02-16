@@ -79,9 +79,9 @@ letters_to_morse = {
 
 morse_to_letters = dict((v,k) for (k,v) in letters_to_morse.items())
 
-def morse_to_text(verbose, gpio, period, max_bpm, dashduration):
-    sleep_time = 1 / max_bpm  # Calculate minimum sleep duration possible to detect the maximum BPM
-    debounce_delay = 60000 / max_bpm
+def morse_to_text(verbose, gpio, period, maxbpm, dashduration):
+    sleep_time = 1 / maxbpm  # Calculate minimum sleep duration possible to detect the maximum BPM
+    debounce_delay = 60000 / maxbpm
     milliseconds_pressed = 0
     char_in_morse = ""  # Holds string of "-" and "."
 
@@ -91,8 +91,7 @@ def morse_to_text(verbose, gpio, period, max_bpm, dashduration):
               '\nTiming will begin upon the first buttom press and be measured for {} milliseconds.\n'.format(period)
 
         # Calculate the exact durations for a dot, dash, letter space, and word space
-        count, duration_average = beatcount.beat_counter(verbose, gpio, period, max_bpm)
-        print 'Done!'
+        count, duration_average = beatcount.beat_counter(verbose, gpio, period, maxbpm)
         milliseconds_space_dash = duration_average
     else:
         milliseconds_space_dash = dashduration
@@ -137,7 +136,7 @@ def morse_to_text(verbose, gpio, period, max_bpm, dashduration):
         button_duration = int(round(time.time()*1000))
 
         # Wait while the button is pressed
-        # This times how long the button is pressed for, and excludes periods below the max_bpm
+        # This times how long the button is pressed for, and excludes periods below the maxbpm
         # The second condition debounces the input, preventing registering of multiple presses
         while (GPIO.input(gpio) == False or
                int(round(time.time()*1000)) - button_duration < debounce_delay):
