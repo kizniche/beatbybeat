@@ -49,6 +49,10 @@ def menu():
 
     args = parser.parse_args()
 
+    if os.geteuid() and not args.texttomorse:
+        print "Script must be ran as root to access GPIO"
+        sys.exit(0)
+
     ########################################
     #                                      #
     #           Setup Options              #
@@ -135,13 +139,10 @@ def menu():
         dashduration = args.dashduration
         if not dashduration:
             dashduration = 300  # Default dash time (milliseconds)
-        print 'Dash duration: {} ms'.format(dashduration)
+        print 'Dash Duration: {} ms'.format(dashduration)
         translate.text_to_morse(dashduration)
 
 
 if __name__ == "__main__":
-    if os.geteuid():
-        print "Script must be ran as root"
-        sys.exit(0)
     menu()
     sys.exit(0)
