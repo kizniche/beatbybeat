@@ -7,6 +7,7 @@
 from lib import beatcount
 from lib import translate
 import argparse
+import os
 import RPi.GPIO as GPIO
 import sys
 
@@ -100,7 +101,13 @@ def menu():
 
     if args.bpmcount:
         print 'Tempo calculation period: {} milliseconds, Max BPM: {} BPM'.format(args.period, args.maxbpm)
-        beatcount.beat_counter(args.verbose, args.gpio, args.period, args.maxbpm)
+        print '\nBegin tapping a tempo to identify the duration between beats.', \
+              '\nCalculations will only be performed while there is tapping.', \
+              '\nTiming will begin upon the first buttom press and be measured every {} milliseconds.\n'.format(args.period)
+        while True:
+            count, duration_average = beatcount.beat_counter(args.verbose, args.gpio, args.period, args.maxbpm)
+            print '\nCalculated from total number of beats over time: {} beats per {} ms = {} BPM'.format(count, args.period, count * (60 / (args.period / 1000)))
+            print 'Calculated from average duration between beats: {} ms per beat = {} BPM\n'.format(duration_average, 60000 / duration_average)
 
     ########################################
     #                                      #
@@ -133,5 +140,8 @@ def menu():
 
 
 if __name__ == "__main__":
+    if os.geteuid():
+        print "Script must be ran as root"
+        sys.exit(0)
     menu()
     sys.exit(0)

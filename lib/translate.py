@@ -4,6 +4,7 @@
 # translate.py - Morse code translator
 #
 
+from lib import beatcount
 import RPi.GPIO as GPIO
 import sys
 import time
@@ -90,7 +91,9 @@ def morse_to_text(verbose, gpio, period, max_bpm, dashduration):
               '\nTiming will begin upon the first buttom press and be measured for {} milliseconds.\n'.format(period)
 
         # Calculate the exact durations for a dot, dash, letter space, and word space
-        milliseconds_space_dash = detect_bpm(verbose, gpio, period, max_bpm)
+        count, duration_average = beatcount.beat_counter(verbose, gpio, period, max_bpm)
+        print 'Done!'
+        milliseconds_space_dash = duration_average
     else:
         milliseconds_space_dash = dashduration
 
@@ -231,55 +234,3 @@ def letter_duration(dashduration, morse_letter_code):
             total_duration = total_duration + dashduration
 
     return total_duration
-
-
-def detect_bpm(verbose, gpio, period, max_bpm):
-    sleep_time = 1 / max_bpm   # Calculate minimum sleep duration possible to detect the maximum BPM
-    debounce_delay = 60000 / max_bpm
-    beat_count_period = 1
-    duration_total = 0
-    detected_milliseconds = 0
-    first_beat = True
-
-    # Wait until the button is pressed for the first time
-    while GPIO.input(gpio):  # While button is not pressed
-        time.sleep(0.01)
-
-    start_time = time_between_beatcount = int(round(time.time()*1000))
-    if verbose:
-        print 'Beat number {}, Time: {}'.format(beat_count_period, start_time)
-    else:
-        print '.',
-        sys.stdout.flush()
-
-    while not detected_milliseconds:
-        if int(round(time.time()*1000)) - time_between_beatcount >= debounce_delay:
-
-            # If button is pressed, count a beat
-            if GPIO.input(gpio) == False:
-                time_now = int(round(time.time()*1000))
-                beat_count_period += 1
-
-                if first_beat:
-                    duration_total = int(round(time.time()*1000)) - time_between_beatcount
-                    first_beat = False
-                else:
-                    duration_total = (int(round(time.time()*1000)) - time_between_beatcount) + duration_total
-                if verbose:
-                    print 'Beat number {}, Time: {}, Diff: {} ms, Average: {} ms'.format(beat_count_period, time_now, time_now - time_between_beatcount, duration_total / (beat_count_period - 1))
-                else:
-                    print '.',
-                    sys.stdout.flush()
-
-                time_between_beatcount = time_now
-                while GPIO.input(gpio) == False:
-                    time.sleep(sleep_time)
-
-        # When the period for beat detection has elapsed, end the loop
-        if int(round(time.time()*1000)) - start_time > period:
-            detected_milliseconds = duration_total / (beat_count_period - 1)
-            print 'Done!'
-
-        time.sleep(sleep_time)
-
-    return detected_milliseconds

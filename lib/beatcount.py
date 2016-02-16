@@ -5,6 +5,7 @@
 #
 
 import RPi.GPIO as GPIO
+import sys
 import time
 
 def beat_counter(verbose, gpio, period, max_bpm):
@@ -14,50 +15,57 @@ def beat_counter(verbose, gpio, period, max_bpm):
     duration_average = 0
     first_beat = first_beat_average = True
 
-    print '\nBegin tapping a tempo to identify the duration between beats.', \
-          '\nCalculations will only be performed while there is tapping.', \
-          '\nTiming will begin upon the first buttom press and be measured every {} milliseconds.\n'.format(period)
+    # Wait while the button is unpressed
+    while GPIO.input(gpio):
+        time.sleep(sleep_time)
 
     while True:
         if first_beat:
-            # Wait until the button is pressed for the first time
+            # Wait while the button is unpressed
             while GPIO.input(gpio):
-                time.sleep(0.01)
-
+                time.sleep(sleep_time)
             time_between_beats = time_between_beatcount = int(round(time.time()*1000))
 
-            if verbose:
-                print 'Beat number {}, time now: {}'.format(beat_count_period, time_between_beats)
-            beat_count_period += 1
-            first_beat = False
+        if int(round(time.time()*1000)) - time_between_beatcount < period:
+            if first_beat:
+                if verbose:
+                    print 'Beat number {}, Time: {}'.format(beat_count_period, time_between_beats)
+                else:
+                    print '.',
+                    sys.stdout.flush()
+                beat_count_period += 1
+                first_beat = False
+            else:
+                time_now = int(round(time.time()*1000))
+                if verbose:
+                    print 'Beat number {}, Time: {}, Diff: {}, Average: {}'.format(beat_count_period, time_now, time_now - time_between_beats, duration_average)
+                else:
+                    print '.',
+                    sys.stdout.flush()
+                time_between_beats = time_now
+                beat_count_period += 1
 
-        # Duration between beats must be greater than or equal to the duration of max BPM in milliseconds
-        if int(round(time.time()*1000)) - time_between_beats >= debounce_delay and GPIO.input(gpio) == False:
-            time_now = int(round(time.time()*1000))
+        # Wait while the button is pressed
+        button_duration = int(round(time.time()*1000))
+        while ((GPIO.input(gpio) == False or
+               int(round(time.time()*1000)) - button_duration < debounce_delay) and
+               int(round(time.time()*1000)) - time_between_beatcount < period):
+            time.sleep(sleep_time)
 
+        # Wait while the button is unpressed
+        button_duration = int(round(time.time()*1000))
+        while ((GPIO.input(gpio) or
+                int(round(time.time()*1000)) - button_duration < debounce_delay) and
+                int(round(time.time()*1000)) - time_between_beatcount < period):
+            time.sleep(sleep_time)
+
+        if int(round(time.time()*1000)) - time_between_beatcount < period:
             if first_beat_average:
-                duration_average = int(round(time.time()*1000)) - time_between_beatcount
+                duration_average = int(round(time.time()*1000)) - time_between_beats
                 first_beat_average = False
             else:
                 duration_average = ((int(round(time.time()*1000)) - time_between_beats) + duration_average) / 2
-            if verbose:
-                print 'Beat number {}, time now: {}, time diff: {}, Average: {}'.format(beat_count_period, time_now, time_now - time_between_beats, duration_average)
-
-            time_between_beats = time_now
-            beat_count_period += 1
-            while GPIO.input(gpio) == False:
-                time.sleep(sleep_time)
 
         if int(round(time.time()*1000)) - time_between_beatcount > period:
             count = beat_count_period - beat_count_bpm
-            print '\nCalculated from total number of beats over time: {} beats per {} ms = {} BPM'.format(count, period, count * (60 / (period / 1000)))
-            if duration_average:
-                print 'Calculated from average duration between beats: {} ms per beat = {} BPM\n'.format(duration_average, 60000 / duration_average)
-            else:
-                print ''
-            time_between_beatcount = int(round(time.time()*1000))
-            beat_count_bpm = beat_count_period = 1
-            duration_average = 0
-            first_beat = first_beat_average = True
-
-        time.sleep(sleep_time)
+            return count, duration_average
