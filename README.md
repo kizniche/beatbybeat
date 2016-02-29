@@ -32,4 +32,5 @@ An internal pullup resistor is activated in software, but another resistor (10k 
 
 ### Command Line Options
 
-./beatbybeat --help
+./beatbybeat.py --help
+
