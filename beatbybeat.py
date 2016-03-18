@@ -35,6 +35,9 @@ def menu():
     morse_translator.add_argument('-tm', '--texttomorse', action='store_true',
                               help="Translate text to Morse code")
 
+    morse_translator.add_argument('-t', '--textonly', action='store_true',
+                              help="Show only translated letters (Morse to text translation only)")
+
     morse_translator.add_argument('-d','--dashduration', metavar='DASHDURATION', type=int,
                               help='Duration of a dash (Morse-to-text default: none, Text-to-Morse default: 300 ms). If set with -mt the tempo detection will be overridden.',
                               default=0,
@@ -43,6 +46,11 @@ def menu():
     misc_options = parser.add_argument_group('Miscelaneous')
     misc_options.add_argument('-g','--gpio', metavar='GPIO', type=int,
                               help='GPIO pin connected to the telegraph (using BCM numbering)')
+
+    misc_options.add_argument('-l','--lcd', metavar='I2CADDRESS', type=str,
+                              help='Specify the I2C address of 2x16 character LCD (I2C backpack) to output to. ex. "0x25"',
+                              default='0',
+                              required=False)
 
     misc_options.add_argument('-v', '--verbose', action='store_true',
                               help="Print more information to the terminal")
@@ -127,7 +135,7 @@ def menu():
         if dashduration / 3 < 60000 / args.maxbpm:
             parser.error('--dashduration too low. Increase -d or degrease -b')
         print 'Tempo calculation period: {} milliseconds, Max BPM: {} BPM, Debounce Delay: {} ms'.format(args.period, args.maxbpm, 60000 / args.maxbpm)
-        translate.morse_to_text(args.verbose, args.gpio, args.period, args.maxbpm, args.dashduration)
+        translate.morse_to_text(args.verbose, args.textonly, args.gpio, args.period, args.maxbpm, args.dashduration, args.lcd)
 
     ########################################
     #                                      #
@@ -141,6 +149,50 @@ def menu():
             dashduration = 300  # Default dash time (milliseconds)
         print 'Dash Duration: {} ms'.format(dashduration)
         translate.text_to_morse(dashduration)
+
+
+def lcd_init():
+  # Initialise display
+  lcd_byte(0x33,LCD_CMD) # 110011 Initialise
+  lcd_byte(0x32,LCD_CMD) # 110010 Initialise
+  lcd_byte(0x06,LCD_CMD) # 000110 Cursor move direction
+  lcd_byte(0x0C,LCD_CMD) # 001100 Display On,Cursor Off, Blink Off 
+  lcd_byte(0x28,LCD_CMD) # 101000 Data length, number of lines, font size
+  lcd_byte(0x01,LCD_CMD) # 000001 Clear display
+  time.sleep(E_DELAY)
+
+
+def lcd_byte(bits, mode):
+  # Send byte to data pins
+  # bits = the data
+  # mode = 1 for data
+  #        0 for command
+  bits_high = mode | (bits & 0xF0) | LCD_BACKLIGHT
+  bits_low = mode | ((bits<<4) & 0xF0) | LCD_BACKLIGHT
+  # High bits
+  bus.write_byte(I2C_ADDR, bits_high)
+  lcd_toggle_enable(bits_high)
+  # Low bits
+  bus.write_byte(I2C_ADDR, bits_low)
+  lcd_toggle_enable(bits_low)
+
+
+def lcd_toggle_enable(bits):
+  # Toggle enable
+  time.sleep(E_DELAY)
+  bus.write_byte(I2C_ADDR, (bits | ENABLE))
+  time.sleep(E_PULSE)
+  bus.write_byte(I2C_ADDR,(bits & ~ENABLE))
+  time.sleep(E_DELAY)
+
+
+def lcd_string(message,line):
+  # Send string to display
+  message = message.ljust(LCD_WIDTH," ")
+  lcd_byte(line, LCD_CMD)
+  for i in range(LCD_WIDTH):
+    lcd_byte(ord(message[i]),LCD_CHR)
+
 
 
 if __name__ == "__main__":
