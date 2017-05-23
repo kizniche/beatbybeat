@@ -11,20 +11,26 @@ import os
 import RPi.GPIO as GPIO
 import sys
 
+
 def menu():
-    parser = argparse.ArgumentParser(description='Beat counter (bpm) and Morse code translator')
+    parser = argparse.ArgumentParser(description='Beat counter (bpm) and '
+                                                 'Morse code translator')
 
     beat_counter = parser.add_argument_group('Beat counter')
     beat_counter.add_argument('-b', '--bpmcount', action='store_true',
                               help="Start program to count beats (bpm)")
 
-    beat_counter.add_argument('-m','--maxbpm', metavar='MAXBPM', type=int,
-                              help='Set maximum detectable BPM (lower number improves accuracy, higher numbers may register erroneous taps, below 2000 should be accurate), default: 2000',
+    beat_counter.add_argument('-m', '--maxbpm', metavar='MAXBPM', type=int,
+                              help='Set maximum detectable BPM (lower number '
+                                   'improves accuracy, higher numbers may '
+                                   'register erroneous taps, below 2000 '
+                                   'should be accurate), default: 2000',
                               default=2000,
                               required=False)
 
-    beat_counter.add_argument('-p','--period', metavar='PERIOD', type=int,
-                              help='Period of time between BPM calculations (milliseconds), default: 5000',
+    beat_counter.add_argument('-p', '--period', metavar='PERIOD', type=int,
+                              help='Period of time between BPM calculations '
+                                   '(milliseconds), default: 5000',
                               default=5000,
                               required=False)
 
@@ -36,19 +42,27 @@ def menu():
                               help="Translate text to Morse code")
 
     morse_translator.add_argument('-t', '--textonly', action='store_true',
-                              help="Show only translated letters (Morse to text translation only)")
+                              help="Show only translated letters (Morse to "
+                                   "text translation only)")
 
-    morse_translator.add_argument('-d','--dashduration', metavar='DASHDURATION', type=int,
-                              help='Duration of a dash (Morse-to-text default: none, Text-to-Morse default: 300 ms). If set with -mt the tempo detection will be overridden.',
+    morse_translator.add_argument('-d', '--dashduration', metavar='DASHDURATION',
+                                  type=int,
+                              help='Duration of a dash (Morse-to-text '
+                                   'default: none, Text-to-Morse default: '
+                                   '300 ms). If set with -mt the tempo '
+                                   'detection will be overridden.',
                               default=0,
                               required=False)
 
     misc_options = parser.add_argument_group('Miscelaneous')
-    misc_options.add_argument('-g','--gpio', metavar='GPIO', type=int,
-                              help='GPIO pin connected to the telegraph (using BCM numbering)')
+    misc_options.add_argument('-g', '--gpio', metavar='GPIO', type=int,
+                              help='GPIO pin connected to the telegraph '
+                                   '(using BCM numbering)')
 
-    misc_options.add_argument('-l','--lcd', metavar='I2CADDRESS', type=str,
-                              help='Specify the I2C address of 2x16 character LCD (I2C backpack) to output to. ex. "0x25"',
+    misc_options.add_argument('-l', '--lcd', metavar='I2CADDRESS', type=str,
+                              help='Specify the I2C address of 2x16 '
+                                   'character LCD (I2C backpack) to '
+                                   'output to. ex. "0x25"',
                               default='0',
                               required=False)
 
@@ -68,9 +82,11 @@ def menu():
     ########################################
 
     if not (args.bpmcount or args.morsetotext or args.texttomorse):
-        parser.error('No action requested, add --bpmcount or --morsetotext or --texttomorse')
+        parser.error('No action requested, add --bpmcount or --morsetotext or '
+                     '--texttomorse')
     elif sum(map(bool, [args.bpmcount, args.morsetotext, args.texttomorse])) != 1:
-        parser.error('Can only select one: --bpmcount (-b), --morsetotext (-mt), or --texttomorse (-tm)')
+        parser.error('Can only select one: --bpmcount (-b), --morsetotext '
+                     '(-mt), or --texttomorse (-tm)')
     elif args.bpmcount:
         if not args.gpio:
             parser.error('Need to specify GPIO pin with --gpio')
@@ -82,7 +98,8 @@ def menu():
         else:
             print 'Morse code to text translator',
     elif args.texttomorse:
-        print 'Text to Morse code translator (use only A-Z, 0-9, spaces, and symbols /?\'!@$&()_-+=,.;:")',
+        print 'Text to Morse code translator (use only A-Z, 0-9, spaces, ' \
+              'and symbols /?\'!@$&()_-+=,.;:")',
 
     if args.verbose:
         print '(Verbose)'
@@ -112,14 +129,22 @@ def menu():
     ########################################
 
     if args.bpmcount:
-        print 'Tempo calculation period: {} milliseconds, Max BPM: {} BPM, Debounce Delay: {} ms'.format(args.period, args.maxbpm, 60000 / args.maxbpm)
+        print 'Tempo calculation period: {} milliseconds, Max BPM: {} BPM, ' \
+              'Debounce Delay: {} ms'.format(
+                args.period, args.maxbpm, 60000 / args.maxbpm)
         print '\nBegin tapping a tempo to identify the duration between beats.', \
               '\nCalculations will only be performed while there is tapping.', \
-              '\nTiming will begin upon the first buttom press and be measured every {} milliseconds.\n'.format(args.period)
+              '\nTiming will begin upon the first buttom press and be ' \
+              'measured every {} milliseconds.\n'.format(args.period)
         while True:
-            count, duration_average = beatcount.beat_counter(args.verbose, args.gpio, args.period, args.maxbpm)
-            print '\nCalculated from total number of beats over time: {} beats per {} ms = {} BPM'.format(count, args.period, count * (60 / (args.period / 1000)))
-            print 'Calculated from average duration between beats: {} ms per beat = {} BPM\n'.format(duration_average, 60000 / duration_average)
+            count, duration_average = beatcount.beat_counter(
+                args.verbose, args.gpio, args.period, args.maxbpm)
+            print '\nCalculated from total number of beats over time: {} ' \
+                  'beats per {} ms = {} BPM'.format(
+                    count, args.period, count * (60 / (args.period / 1000)))
+            print 'Calculated from average duration between beats: {} ms ' \
+                  'per beat = {} BPM\n'.format(
+                    duration_average, 60000 / duration_average)
 
     ########################################
     #                                      #
@@ -134,8 +159,12 @@ def menu():
             dashduration = args.dashduration
         if dashduration / 3 < 60000 / args.maxbpm:
             parser.error('--dashduration too low. Increase -d or degrease -b')
-        print 'Tempo calculation period: {} milliseconds, Max BPM: {} BPM, Debounce Delay: {} ms'.format(args.period, args.maxbpm, 60000 / args.maxbpm)
-        translate.morse_to_text(args.verbose, args.textonly, args.gpio, args.period, args.maxbpm, args.dashduration, args.lcd)
+        print 'Tempo calculation period: {} milliseconds, Max BPM: {} BPM, ' \
+              'Debounce Delay: {} ms'.format(
+                args.period, args.maxbpm, 60000 / args.maxbpm)
+        translate.morse_to_text(args.verbose, args.textonly, args.gpio,
+                                args.period, args.maxbpm, args.dashduration,
+                                args.lcd)
 
     ########################################
     #                                      #

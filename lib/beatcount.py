@@ -8,8 +8,9 @@ import RPi.GPIO as GPIO
 import sys
 import time
 
+
 def beat_counter(verbose, gpio, period, maxbpm):
-    sleep_time = 1 / maxbpm # Calculate minimum sleep duration possible to detect the maximum BPM
+    sleep_time = 1 / maxbpm  # Calculate minimum sleep duration possible to detect the maximum BPM
     debounce_delay = 60000 / maxbpm
     beat_count_bpm = beat_count_period = 1
     duration_average = 0
@@ -36,9 +37,10 @@ def beat_counter(verbose, gpio, period, maxbpm):
                 beat_count_period += 1
                 first_beat = False
             else:
-                time_now = int(round(time.time()*1000))
+                time_now = int(round(time.time() * 1000))
                 if verbose:
-                    print 'Beat {}, Time: {}, Diff: {}, Average: {}'.format(beat_count_period, time_now, time_now - time_between_beats, duration_average)
+                    print 'Beat {}, Time: {}, Diff: {}, Average: {}'.format(
+                        beat_count_period, time_now, time_now - time_between_beats, duration_average)
                 else:
                     print '.',
                     sys.stdout.flush()
@@ -47,7 +49,7 @@ def beat_counter(verbose, gpio, period, maxbpm):
 
         # Wait while the button is pressed
         button_duration = int(round(time.time()*1000))
-        while ((GPIO.input(gpio) == False or
+        while ((not GPIO.input(gpio) or
                int(round(time.time()*1000)) - button_duration < debounce_delay) and
                int(round(time.time()*1000)) - time_between_beatcount < period):
             time.sleep(sleep_time)

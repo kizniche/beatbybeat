@@ -11,78 +11,79 @@ import time
 
 # Morse Code Dictionary
 letters_to_morse = {
-    "A" : ".-",
-    "B" : "-...",
-    "C" : "-.-.",
-    "D" : "-..",
-    "E" : ".",
-    "F" : "..-.",
-    "G" : "--.",
-    "H" : "....",
-    "I" : "..",
-    "J" : ".---",
-    "K" : "-.-",
-    "L" : ".-..",
-    "M" : "--",
-    "N" : "-.",
-    "O" : "---",
-    "P" : ".--.",
-    "Q" : "--.-",
-    "R" : ".-.",
-    "S" : "...",
-    "T" : "-",
-    "U" : "..-",
-    "V" : "...-",
-    "W" : ".--",
-    "X" : "-..-",
-    "Y" : "-.--",
-    "Z" : "--..",
-    "1" : ".----",
-    "2" : "..---",
-    "3" : "...--",
-    "4" : "....-",
-    "5" : ".....",
-    "6" : "-....",
-    "7" : "--...",
-    "8" : "---..",
-    "9" : "----.",
-    "0" : "-----",
-    "AA/New Line" : ".-.-",
-    "AR/New Page" : ".-.-.",
-    "AS/WAIT" : ".-...",
-    "BT/New Paragraph" : "-...-",
-    "HH/ERROR" : "........",
-    "KN/OK, Named" : "-.--.",
-    "SK/End Contact" : "...-.-",
-    "SN/Understood" : "...-.",
-    "SOS" : "...---...",
-    " " : "/",
-    "." : ".-.-.-",
-    "," : "--..--",
-    "?" : "..--..",
-    "'" : ".----.",
-    "!" : "-.-.--",
-    "/" : "-..-.",
-    "(" : "-.--.",
-    ")" : "-.--.-",
-    "&" : ".-...",
-    ":" : "---...",
-    ";" : "-.-.-.",
-    "=" : "-...-",
-    "+/ATTENTION" : ".-.-.",
-    "-" : "-....-",
-    "_" : "..--.-",
-    "\"" : ".-..-.",
-    "$" : "..-..-",
-    "@" : ".--.-.",
-    }
+    "A": ".-",
+    "B": "-...",
+    "C": "-.-.",
+    "D": "-..",
+    "E": ".",
+    "F": "..-.",
+    "G": "--.",
+    "H": "....",
+    "I": "..",
+    "J": ".---",
+    "K": "-.-",
+    "L": ".-..",
+    "M": "--",
+    "N": "-.",
+    "O": "---",
+    "P": ".--.",
+    "Q": "--.-",
+    "R": ".-.",
+    "S": "...",
+    "T": "-",
+    "U": "..-",
+    "V": "...-",
+    "W": ".--",
+    "X": "-..-",
+    "Y": "-.--",
+    "Z": "--..",
+    "1": ".----",
+    "2": "..---",
+    "3": "...--",
+    "4": "....-",
+    "5": ".....",
+    "6": "-....",
+    "7": "--...",
+    "8": "---..",
+    "9": "----.",
+    "0": "-----",
+    "AA/New Line": ".-.-",
+    "AR/New Page": ".-.-.",
+    "AS/WAIT": ".-...",
+    "BT/New Paragraph": "-...-",
+    "HH/ERROR": "........",
+    "KN/OK, Named": "-.--.",
+    "SK/End Contact": "...-.-",
+    "SN/Understood": "...-.",
+    "SOS": "...---...",
+    " ": "/",
+    ".": ".-.-.-",
+    ",": "--..--",
+    "?": "..--..",
+    "'": ".----.",
+    "!": "-.-.--",
+    "/": "-..-.",
+    "(": "-.--.",
+    ")": "-.--.-",
+    "&": ".-...",
+    ":": "---...",
+    ";": "-.-.-.",
+    "=": "-...-",
+    "+/ATTENTION": ".-.-.",
+    "-": "-....-",
+    "_": "..--.-",
+    "\"": ".-..-.",
+    "$": "..-..-",
+    "@": ".--.-."
+}
 
-morse_to_letters = dict((v,k) for (k,v) in letters_to_morse.items())
+morse_to_letters = dict((v, k) for (k, v) in letters_to_morse.items())
 
-def morse_to_text(verbose, gpio, period, maxbpm, dashduration):
+
+def morse_to_text(verbose, text_only, gpio, period, maxbpm, dashduration, lcd):
+    # TODO: implement variables text_only, lcd
     sleep_time = 1 / maxbpm  # Calculate minimum sleep duration possible to detect the maximum BPM
     debounce_delay = 60000 / maxbpm
-    milliseconds_pressed = 0
     char_in_morse = ""  # Holds string of "-" and "."
 
     if not dashduration:
@@ -91,7 +92,7 @@ def morse_to_text(verbose, gpio, period, maxbpm, dashduration):
               '\nTiming will begin upon the first buttom press and be measured for {} milliseconds.\n'.format(period)
 
         # Calculate the exact durations for a dot, dash, letter space, and word space
-        count, duration_average = beatcount.beat_counter(verbose, gpio, period, maxbpm)
+        _, duration_average = beatcount.beat_counter(verbose, gpio, period, maxbpm)
         milliseconds_space_dash = duration_average
     else:
         milliseconds_space_dash = dashduration
@@ -106,17 +107,20 @@ def morse_to_text(verbose, gpio, period, maxbpm, dashduration):
     milliseconds_dot_error_high = (milliseconds_dot + milliseconds_space_dash) / 2
 
     # Present the exact durations for each unit
-    print '\nDurations acquired (ms = milliseconds):'
-    print 'Between words: {} ms'.format(milliseconds_between_words)
-    print 'Between letters: {} ms'.format(milliseconds_space_dash)
-    print 'Dash: {} ms'.format(milliseconds_space_dash)
-    print 'Dot: {} ms'.format(milliseconds_dot)
 
     # Present the ranges of durations that are acceptable for translation
-    print '\nA Dot will register when the pressed duration is between {} and {} ms'.format(debounce_delay, milliseconds_dot_error_high)
-    print 'A Dash will register when the pressed duration is between {} and {} ms'.format(milliseconds_dot_error_high, milliseconds_dash_error_high)
-    print 'A new letter will register when the unpressed duration is between between {} and {} ms'.format(milliseconds_dot_error_high, milliseconds_dash_error_high)
-    print 'A new word will register when the unpressed duration is greater than {} ms'.format(milliseconds_dash_error_high)
+    print '\nA Dot will register when the pressed duration is between {} and ' \
+          '{} ms'.format(
+            debounce_delay, milliseconds_dot_error_high)
+    print 'A Dash will register when the pressed duration is between {} and ' \
+          '{} ms'.format(
+            milliseconds_dot_error_high, milliseconds_dash_error_high)
+    print 'A new letter will register when the unpressed duration is between ' \
+          'between {} and {} ms'.format(
+            milliseconds_dot_error_high, milliseconds_dash_error_high)
+    print 'A new word will register when the unpressed duration is greater ' \
+          'than {} ms'.format(
+            milliseconds_dash_error_high)
 
     if not dashduration:
         print '\nWait 5 seconds before beginning Morse code...\n'
@@ -129,7 +133,7 @@ def morse_to_text(verbose, gpio, period, maxbpm, dashduration):
     while GPIO.input(gpio):  # while the button is not pressed
         time.sleep(sleep_time)
 
-    while True:  
+    while True:
         #
         # Begin timing how long the button is pressed
         #
@@ -138,7 +142,7 @@ def morse_to_text(verbose, gpio, period, maxbpm, dashduration):
         # Wait while the button is pressed
         # This times how long the button is pressed for, and excludes periods below the maxbpm
         # The second condition debounces the input, preventing registering of multiple presses
-        while (GPIO.input(gpio) == False or
+        while (not GPIO.input(gpio) or
                int(round(time.time()*1000)) - button_duration < debounce_delay):
             time.sleep(sleep_time)
 
@@ -204,7 +208,7 @@ def text_to_morse(dashduration):
         for letter in text_input:
             if letter.upper() not in letters_to_morse:
                 string_valid = False
-                
+
         if string_valid:
             total_duration = 0
             for letter in text_input:
@@ -216,6 +220,7 @@ def text_to_morse(dashduration):
 
 
 def letter_duration(dashduration, morse_letter_code):
+    first = True
     total_duration = 0
     for unit in morse_letter_code:
         if unit == "-":
@@ -226,7 +231,6 @@ def letter_duration(dashduration, morse_letter_code):
             total_duration = total_duration + (dashduration / 3 * 7)
 
         # Add duration between letters
-        first = True
         if first:
             first = False
         else: 
