@@ -1,5 +1,7 @@
 # BeatByBeat
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/23d9241f3b134561a5760b5c2c0f744e)](https://www.codacy.com/app/Mycodo/beatbybeat?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=kizniche/beatbybeat&amp;utm_campaign=Badge_Grade)
+
 Python BPM counter and Morse code translator, for use with a telegraph (push-button) connected to a Raspberry Pi.
 
 ### Morse Code
