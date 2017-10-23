@@ -116,7 +116,7 @@ def morse_to_text(verbose, text_only, gpio, period, maxbpm, dashduration, lcd):
           '{} ms'.format(
             milliseconds_dot_error_high, milliseconds_dash_error_high)
     print 'A new letter will register when the unpressed duration is between ' \
-          'between {} and {} ms'.format(
+          '{} and {} ms'.format(
             milliseconds_dot_error_high, milliseconds_dash_error_high)
     print 'A new word will register when the unpressed duration is greater ' \
           'than {} ms'.format(
